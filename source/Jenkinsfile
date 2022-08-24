@@ -1,0 +1,37 @@
+pipeline {
+    environment {
+	  REGION = 'eu-west-3'
+    DOCKER_REPO = 'theironhidex'
+      }
+
+ agent any
+    tools {
+    }    
+    stages {
+        stage ("Build Image") {
+		        steps {
+                sh "docker build -t ${env.DOCKER_REPO}/${JOB_BASE_NAME}-app:${BUILD_NUMBER} /var/lib/jenkins/workspace/jose/reto-java/source/"
+		            }
+            }
+      
+        stage ("Publish Image") {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerHubAccount', passwordVariable: 'docker_pass', usernameVariable: 'docker_user')]) {
+                    sh "docker login -u $docker_user -p $docker_pass"
+                    sh "docker push ${env.DOCKER_REPO}/${JOB_BASE_NAME}-app:${BUILD_NUMBER}"
+                }
+            }
+        } 
+      
+       stage('Launch application') {
+            steps{
+	            withCredentials([
+		            aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-jose', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {               
+                  sh """
+                 }
+	           }																  
+         }   
+ 	  
+        
+    }
+}
